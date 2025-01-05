@@ -104,7 +104,6 @@ public class MainController {
         }
     }
 
-
     // TRANSACTIONS ENDPOINTS
 
     @Autowired
@@ -124,7 +123,8 @@ public class MainController {
 
     // Endpoint: Update a transaction
     @PutMapping("/transactions/{id}")
-    public ResponseEntity<Transaction> updateTransaction(@PathVariable Long id, @RequestBody Transaction updatedTransaction) {
+    public ResponseEntity<Transaction> updateTransaction(@PathVariable Long id,
+            @RequestBody Transaction updatedTransaction) {
         return transactionRepository.findById(id)
                 .map(transaction -> {
                     transaction.setItem(updatedTransaction.getItem());
@@ -146,4 +146,16 @@ public class MainController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    // Fetch all items in a specific category
+    @GetMapping("/categories/{id}/items")
+    public ResponseEntity<List<Item>> getItemsByCategory(@PathVariable Long id) {
+        return categoryRepository.findById(id)
+                .map(category -> {
+                    List<Item> items = category.getItems(); // Assuming a `List<Item>` in Category
+                    return ResponseEntity.ok(items);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }

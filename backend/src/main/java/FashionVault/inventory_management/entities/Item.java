@@ -1,4 +1,5 @@
 package FashionVault.inventory_management.entities;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -23,7 +24,8 @@ public class Item {
     private Integer quantity;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
+    @JsonBackReference
     private Category category;
 
     @Column(nullable = false)
@@ -39,6 +41,9 @@ public class Item {
     private Date updatedAt = new Date();
 
     // Getters and Setters
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -53,9 +58,6 @@ public class Item {
 
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
-
-    public Category getCategory() { return category; }
-    public void setCategory(Category category) { this.category = category; }
 
     public String getSize() { return size; }
     public void setSize(String size) { this.size = size; }
