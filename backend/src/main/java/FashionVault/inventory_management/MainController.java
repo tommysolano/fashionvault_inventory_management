@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -23,19 +24,16 @@ public class MainController {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    // Endpoint: Get all categories
     @GetMapping("/categories")
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }
 
-    // Endpoint: Add a new category
     @PostMapping("/categories")
     public Category addCategory(@RequestBody Category category) {
         return categoryRepository.save(category);
     }
 
-    // Endpoint: Update a category
     @PutMapping("/categories/{id}")
     public ResponseEntity<Category> updateCategory(@PathVariable Long id, @RequestBody Category updatedCategory) {
         return categoryRepository.findById(id)
@@ -47,7 +45,6 @@ public class MainController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Endpoint: Delete a category
     @DeleteMapping("/categories/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         if (categoryRepository.existsById(id)) {
@@ -63,26 +60,24 @@ public class MainController {
     @Autowired
     private ItemRepository itemRepository;
 
-    // Endpoint: Get all items
     @GetMapping("/items")
     public List<Item> getAllItems() {
         return itemRepository.findAll();
     }
 
-    // Endpoint: Add a new item
     @PostMapping("/items")
     public Item addItem(@RequestBody Item item) {
         return itemRepository.save(item);
     }
 
-    // Endpoint: Update an item
     @PutMapping("/items/{id}")
     public ResponseEntity<Item> updateItem(@PathVariable Long id, @RequestBody Item updatedItem) {
         return itemRepository.findById(id)
                 .map(item -> {
                     item.setName(updatedItem.getName());
                     item.setDescription(updatedItem.getDescription());
-                    item.setPrice(updatedItem.getPrice());
+                    item.setPurchasePrice(updatedItem.getPurchasePrice());
+                    item.setSalePrice(updatedItem.getSalePrice());
                     item.setQuantity(updatedItem.getQuantity());
                     item.setSize(updatedItem.getSize());
                     item.setColor(updatedItem.getColor());
@@ -93,7 +88,6 @@ public class MainController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Endpoint: Delete an item
     @DeleteMapping("/items/{id}")
     public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
         if (itemRepository.existsById(id)) {
@@ -109,34 +103,54 @@ public class MainController {
     @Autowired
     private TransactionRepository transactionRepository;
 
-    // Endpoint: Get all transactions
     @GetMapping("/transactions")
     public List<Transaction> getAllTransactions() {
         return transactionRepository.findAll();
     }
 
-    // Endpoint: Add a new transaction
     @PostMapping("/transactions")
     public ResponseEntity<Transaction> addTransaction(@RequestBody Transaction transaction) {
-        return ResponseEntity.ok(transactionRepository.save(transaction));
-    }
+        return itemRepository.findById(transaction.getItem().getId())
+                .map(item -> {
+                    BigDecimal unitPrice = transaction.getType() == Transaction.TransactionType.PURCHASE
+                            ? item.getPurchasePrice()
+                            : item.getSalePrice();
 
-    // Endpoint: Update a transaction
-    @PutMapping("/transactions/{id}")
-    public ResponseEntity<Transaction> updateTransaction(@PathVariable Long id,
-            @RequestBody Transaction updatedTransaction) {
-        return transactionRepository.findById(id)
-                .map(transaction -> {
-                    transaction.setItem(updatedTransaction.getItem());
-                    transaction.setType(updatedTransaction.getType());
-                    transaction.setQuantity(updatedTransaction.getQuantity());
-                    transaction.setNotes(updatedTransaction.getNotes());
+                    transaction.setUnitPrice(unitPrice);
+                    transaction.setTotalValue(unitPrice.multiply(new BigDecimal(transaction.getQuantity())));
                     return ResponseEntity.ok(transactionRepository.save(transaction));
                 })
-                .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.badRequest().build());
     }
 
-    // Endpoint: Delete a transaction
+    @PutMapping("/transactions/{id}")
+public ResponseEntity<Transaction> updateTransaction(@PathVariable Long id,
+                                                     @RequestBody Transaction updatedTransaction) {
+    return transactionRepository.findById(id)
+            .map(transaction -> {
+                transaction.setItem(updatedTransaction.getItem());
+                transaction.setType(updatedTransaction.getType());
+                transaction.setQuantity(updatedTransaction.getQuantity());
+                transaction.setNotes(updatedTransaction.getNotes());
+
+                // Fetch the item from the database to ensure all fields are populated
+                return itemRepository.findById(updatedTransaction.getItem().getId())
+                        .map(item -> {
+                            BigDecimal unitPrice = updatedTransaction.getType() == Transaction.TransactionType.PURCHASE
+                                    ? item.getPurchasePrice()
+                                    : item.getSalePrice();
+
+                            transaction.setUnitPrice(unitPrice);
+                            transaction.setTotalValue(unitPrice.multiply(new BigDecimal(updatedTransaction.getQuantity())));
+
+                            return ResponseEntity.ok(transactionRepository.save(transaction));
+                        })
+                        .orElse(ResponseEntity.badRequest().build()); // Item not found
+            })
+            .orElse(ResponseEntity.notFound().build()); // Transaction not found
+}
+
+
     @DeleteMapping("/transactions/{id}")
     public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {
         if (transactionRepository.existsById(id)) {
@@ -147,15 +161,10 @@ public class MainController {
         }
     }
 
-    // Fetch all items in a specific category
     @GetMapping("/categories/{id}/items")
     public ResponseEntity<List<Item>> getItemsByCategory(@PathVariable Long id) {
         return categoryRepository.findById(id)
-                .map(category -> {
-                    List<Item> items = category.getItems(); // Assuming a `List<Item>` in Category
-                    return ResponseEntity.ok(items);
-                })
+                .map(category -> ResponseEntity.ok(category.getItems()))
                 .orElse(ResponseEntity.notFound().build());
     }
-
 }

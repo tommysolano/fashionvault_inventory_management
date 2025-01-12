@@ -1,7 +1,10 @@
 package FashionVault.inventory_management.entities;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 public class Transaction {
@@ -14,11 +17,18 @@ public class Transaction {
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String type;
+    private TransactionType type; // Enum for transaction type
 
     @Column(nullable = false)
     private Integer quantity;
+
+    @Column(nullable = false)
+    private BigDecimal unitPrice; // Price at the time of the transaction
+
+    @Column(nullable = false)
+    private BigDecimal totalValue; // Calculated total value of the transaction
 
     @Column(nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -43,11 +53,11 @@ public class Transaction {
         this.item = item;
     }
 
-    public String getType() {
+    public TransactionType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(TransactionType type) {
         this.type = type;
     }
 
@@ -57,6 +67,22 @@ public class Transaction {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public BigDecimal getUnitPrice() {
+        return unitPrice;
+    }
+
+    public void setUnitPrice(BigDecimal unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+
+    public BigDecimal getTotalValue() {
+        return totalValue;
+    }
+
+    public void setTotalValue(BigDecimal totalValue) {
+        this.totalValue = totalValue;
     }
 
     public Date getTransactionDate() {
@@ -73,5 +99,12 @@ public class Transaction {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public enum TransactionType {
+        @JsonProperty("purchase")
+        PURCHASE,
+        @JsonProperty("sale")
+        SALE
     }
 }

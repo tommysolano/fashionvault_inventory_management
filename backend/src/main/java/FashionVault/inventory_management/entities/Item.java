@@ -1,7 +1,8 @@
 package FashionVault.inventory_management.entities;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -18,7 +19,10 @@ public class Item {
     private String description;
 
     @Column(nullable = false)
-    private BigDecimal price;
+    private BigDecimal purchasePrice; // Added field for purchase price
+
+    @Column(nullable = false)
+    private BigDecimal salePrice; // Added field for sale price
 
     @Column(nullable = false)
     private Integer quantity;
@@ -41,9 +45,6 @@ public class Item {
     private Date updatedAt = new Date();
 
     // Getters and Setters
-    public Category getCategory() { return category; }
-    public void setCategory(Category category) { this.category = category; }
-
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -53,11 +54,17 @@ public class Item {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public BigDecimal getPrice() { return price; }
-    public void setPrice(BigDecimal price) { this.price = price; }
+    public BigDecimal getPurchasePrice() { return purchasePrice; }
+    public void setPurchasePrice(BigDecimal purchasePrice) { this.purchasePrice = purchasePrice; }
+
+    public BigDecimal getSalePrice() { return salePrice; }
+    public void setSalePrice(BigDecimal salePrice) { this.salePrice = salePrice; }
 
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
+
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
 
     public String getSize() { return size; }
     public void setSize(String size) { this.size = size; }
