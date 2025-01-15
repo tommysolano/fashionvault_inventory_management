@@ -2,8 +2,12 @@ package FashionVault.inventory_management.entities;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
@@ -30,9 +34,10 @@ public class Transaction {
     @Column(nullable = false)
     private BigDecimal totalValue; // Calculated total value of the transaction
 
-    @Column(nullable = false, updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date transactionDate = new Date();
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @Column(nullable = false)
+    @Temporal(TemporalType.DATE) // Use DATE instead of TIMESTAMP for simplicity
+    private Date transactionDate;
 
     private String notes;
 
@@ -93,6 +98,11 @@ public class Transaction {
         this.transactionDate = transactionDate;
     }
 
+    public void setTransactionDate(String transactionDate) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        this.transactionDate = formatter.parse(transactionDate);
+    }
+
     public String getNotes() {
         return notes;
     }
@@ -102,9 +112,13 @@ public class Transaction {
     }
 
     public enum TransactionType {
-        @JsonProperty("purchase")
         PURCHASE,
-        @JsonProperty("sale")
-        SALE
+        SALE;
+
+        @JsonCreator
+        public static TransactionType fromString(String value) {
+            return value == null ? null : TransactionType.valueOf(value.toUpperCase());
+        }
+
     }
 }

@@ -25,10 +25,10 @@ public class Item {
     private BigDecimal salePrice; // Added field for sale price
 
     @Column(nullable = false)
-    private Integer quantity;
+    private Integer quantity = 0;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "category_id", nullable = true)
     @JsonBackReference
     private Category category;
 
@@ -43,6 +43,9 @@ public class Item {
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt = new Date();
+
+    @Column(nullable = false)
+    private Boolean deleted = false; // New field
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -71,6 +74,9 @@ public class Item {
 
     public String getColor() { return color; }
     public void setColor(String color) { this.color = color; }
+
+    public boolean isDeleted() { return deleted; } // Getter for deleted
+    public void setDeleted(boolean deleted) { this.deleted = deleted; } // Setter for deleted
 
     public Date getCreatedAt() { return createdAt; }
     public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
