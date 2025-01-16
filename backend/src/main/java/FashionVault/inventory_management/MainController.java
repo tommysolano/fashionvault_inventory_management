@@ -18,6 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "http://localhost:5173") // Allow requests from your frontend
 public class MainController {
 
     // CATEGORY ENDPOINTS
@@ -157,66 +158,66 @@ public class MainController {
     }
 
     @PutMapping("/transactions/{id}")
-public ResponseEntity<Transaction> updateTransaction(@PathVariable Long id,
-                                                     @RequestBody Transaction updatedTransaction) {
-    return transactionRepository.findById(id)
-            .map(transaction -> {
-                System.out.println("Incoming transaction ID: " + id);
-                System.out.println("Incoming transactionDate: " + updatedTransaction.getTransactionDate());
-                System.out.println("Incoming type: " + updatedTransaction.getType());
-                System.out.println("Incoming quantity: " + updatedTransaction.getQuantity());
+    public ResponseEntity<Transaction> updateTransaction(@PathVariable Long id,
+            @RequestBody Transaction updatedTransaction) {
+        return transactionRepository.findById(id)
+                .map(transaction -> {
+                    System.out.println("Incoming transaction ID: " + id);
+                    System.out.println("Incoming transactionDate: " + updatedTransaction.getTransactionDate());
+                    System.out.println("Incoming type: " + updatedTransaction.getType());
+                    System.out.println("Incoming quantity: " + updatedTransaction.getQuantity());
 
-                // Fetch the current item and validate
-                Item currentItem = transaction.getItem();
-                if (currentItem == null || currentItem.getQuantity() == null) {
-                    System.out.println("Invalid current item or quantity");
-                    return ResponseEntity.badRequest().<Transaction>build();
-                }
-                System.out.println("Current item quantity: " + currentItem.getQuantity());
+                    // Fetch the current item and validate
+                    Item currentItem = transaction.getItem();
+                    if (currentItem == null || currentItem.getQuantity() == null) {
+                        System.out.println("Invalid current item or quantity");
+                        return ResponseEntity.badRequest().<Transaction>build();
+                    }
+                    System.out.println("Current item quantity: " + currentItem.getQuantity());
 
-                // Reverse the previous transaction's effect on stock
-                if (transaction.getType() == Transaction.TransactionType.SALE) {
-                    currentItem.setQuantity(currentItem.getQuantity() + transaction.getQuantity());
-                } else if (transaction.getType() == Transaction.TransactionType.PURCHASE) {
-                    currentItem.setQuantity(currentItem.getQuantity() - transaction.getQuantity());
-                }
-                System.out.println("Adjusted stock after reversing previous transaction: " + currentItem.getQuantity());
-                itemRepository.save(currentItem);
+                    // Reverse the previous transaction's effect on stock
+                    if (transaction.getType() == Transaction.TransactionType.SALE) {
+                        currentItem.setQuantity(currentItem.getQuantity() + transaction.getQuantity());
+                    } else if (transaction.getType() == Transaction.TransactionType.PURCHASE) {
+                        currentItem.setQuantity(currentItem.getQuantity() - transaction.getQuantity());
+                    }
+                    System.out.println(
+                            "Adjusted stock after reversing previous transaction: " + currentItem.getQuantity());
+                    itemRepository.save(currentItem);
 
-                // Validate and adjust stock for the new transaction
-                if (updatedTransaction.getType() == Transaction.TransactionType.SALE &&
-                        currentItem.getQuantity() < updatedTransaction.getQuantity()) {
-                    System.out.println("Insufficient stock for SALE");
-                    return ResponseEntity.badRequest().<Transaction>build();
-                }
+                    // Validate and adjust stock for the new transaction
+                    if (updatedTransaction.getType() == Transaction.TransactionType.SALE &&
+                            currentItem.getQuantity() < updatedTransaction.getQuantity()) {
+                        System.out.println("Insufficient stock for SALE");
+                        return ResponseEntity.badRequest().<Transaction>build();
+                    }
 
-                // Apply the new transaction's effect on stock
-                if (updatedTransaction.getType() == Transaction.TransactionType.SALE) {
-                    currentItem.setQuantity(currentItem.getQuantity() - updatedTransaction.getQuantity());
-                } else if (updatedTransaction.getType() == Transaction.TransactionType.PURCHASE) {
-                    currentItem.setQuantity(currentItem.getQuantity() + updatedTransaction.getQuantity());
-                }
-                System.out.println("Adjusted stock after applying new transaction: " + currentItem.getQuantity());
-                itemRepository.save(currentItem);
+                    // Apply the new transaction's effect on stock
+                    if (updatedTransaction.getType() == Transaction.TransactionType.SALE) {
+                        currentItem.setQuantity(currentItem.getQuantity() - updatedTransaction.getQuantity());
+                    } else if (updatedTransaction.getType() == Transaction.TransactionType.PURCHASE) {
+                        currentItem.setQuantity(currentItem.getQuantity() + updatedTransaction.getQuantity());
+                    }
+                    System.out.println("Adjusted stock after applying new transaction: " + currentItem.getQuantity());
+                    itemRepository.save(currentItem);
 
-                // Update transaction details
-                transaction.setType(updatedTransaction.getType());
-                transaction.setQuantity(updatedTransaction.getQuantity());
-                transaction.setNotes(updatedTransaction.getNotes());
-                transaction.setTransactionDate(updatedTransaction.getTransactionDate());
+                    // Update transaction details
+                    transaction.setType(updatedTransaction.getType());
+                    transaction.setQuantity(updatedTransaction.getQuantity());
+                    transaction.setNotes(updatedTransaction.getNotes());
+                    transaction.setTransactionDate(updatedTransaction.getTransactionDate());
 
-                BigDecimal unitPrice = updatedTransaction.getType() == Transaction.TransactionType.PURCHASE
-                        ? currentItem.getPurchasePrice()
-                        : currentItem.getSalePrice();
+                    BigDecimal unitPrice = updatedTransaction.getType() == Transaction.TransactionType.PURCHASE
+                            ? currentItem.getPurchasePrice()
+                            : currentItem.getSalePrice();
 
-                transaction.setUnitPrice(unitPrice);
-                transaction.setTotalValue(unitPrice.multiply(new BigDecimal(updatedTransaction.getQuantity())));
+                    transaction.setUnitPrice(unitPrice);
+                    transaction.setTotalValue(unitPrice.multiply(new BigDecimal(updatedTransaction.getQuantity())));
 
-                return ResponseEntity.ok(transactionRepository.save(transaction));
-            })
-            .orElseGet(() -> ResponseEntity.notFound().build());
-}
-
+                    return ResponseEntity.ok(transactionRepository.save(transaction));
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
     @DeleteMapping("/transactions/{id}")
     public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {

@@ -8,7 +8,7 @@ const App = () => {
     <Router>
       <div className="app">
         <Sidebar />
-        <div className="content">
+        <div className="content h-screen w-4/5 flex flex-col">
           <Routes />
         </div>
       </div>

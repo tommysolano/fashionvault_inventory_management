@@ -33,6 +33,9 @@ export default [
         'warn',
         { allowConstantExport: true },
       ],
+      "no-unknown-atrules": [true, {
+      "ignoreAtRules": ["tailwind", "apply", "variants", "responsive", "screen"]
+    }]
     },
   },
 ]

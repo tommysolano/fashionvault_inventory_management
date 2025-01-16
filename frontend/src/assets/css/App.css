@@ -1,0 +1,15 @@
+.app {
+    display: flex;
+    min-height: 100vh;
+    /* Full viewport height */
+    background-color: #E5E5E5;
+    /* Matches your color palette */
+}
+
+.content {
+    /* flex: 4; */
+    /* Content takes the remaining space */
+    padding: 20px;
+    background-color: #FFFFFF;
+    /* Background for the right section */
+}

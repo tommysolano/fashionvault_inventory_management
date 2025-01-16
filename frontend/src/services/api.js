@@ -139,6 +139,16 @@ const api = {
     }
   },
 
+  // Fetch total number of items (products) in the inventory
+  getTotalProducts: async () => {
+    try {
+      const response = await apiClient.get("/items"); // Use the `/api/items` endpoint
+      return response.data.length; // Assuming the response is an array of items
+    } catch (error) {
+      handleError(error);
+    }
+  },
+
 
 };
 
