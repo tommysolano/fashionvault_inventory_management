@@ -149,6 +149,14 @@ const api = {
     }
   },
 
+  getItemById: async (id) => {
+    try {
+      const response = await apiClient.get(`/items/${id}`);
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  },
 
 };
 

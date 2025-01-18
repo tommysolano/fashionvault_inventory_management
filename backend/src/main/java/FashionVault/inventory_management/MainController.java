@@ -78,6 +78,13 @@ public class MainController {
                 .toList();
     }
 
+    @GetMapping("/items/{id}")
+    public ResponseEntity<Item> getItemById(@PathVariable Long id) {
+        return itemRepository.findById(id)
+                .map(item -> ResponseEntity.ok().body(item))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @PostMapping("/items")
     public Item addItem(@RequestBody Item item) {
         return itemRepository.save(item);
