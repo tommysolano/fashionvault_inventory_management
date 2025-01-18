@@ -6,6 +6,8 @@ import Categories from "../pages/Categories";
 import Transactions from "../pages/Transactions";
 import AddProduct from "../pages/AddProduct";
 import EditProduct from "../pages/EditProduct";
+import AddCategory from "../pages/AddCategory";
+import EditCategory from "../pages/EditCategory";
 
 const AppRoutes = () => {
   return (
@@ -16,6 +18,8 @@ const AppRoutes = () => {
       <Route path="/products/add" element={<AddProduct />} />
       <Route path="/products/edit/:id" element={<EditProduct />} />
       <Route path="/categories" element={<Categories />} />
+      <Route path="/categories/add" element={<AddCategory />} />
+      <Route path="/categories/edit/:id" element={<EditCategory />} />;
       <Route path="/transactions" element={<Transactions />} />
     </Routes>
   );

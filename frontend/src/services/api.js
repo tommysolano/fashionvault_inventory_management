@@ -158,6 +158,15 @@ const api = {
     }
   },
 
+  getCategoryById: async (id) => {
+    try {
+      const response = await apiClient.get(`/categories/${id}`); // Use apiClient instead of axios
+      return response.data;
+    } catch (error) {
+      handleError(error); // Use the general error handler
+    }
+  },
+
 };
 
 export default api;
