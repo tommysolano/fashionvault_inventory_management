@@ -31,6 +31,13 @@ public class MainController {
         return categoryRepository.findAll();
     }
 
+    @GetMapping("/categories/{id}")
+    public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
+        return categoryRepository.findById(id)
+                .map(category -> ResponseEntity.ok().body(category))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @PostMapping("/categories")
     public Category addCategory(@RequestBody Category category) {
         return categoryRepository.save(category);
